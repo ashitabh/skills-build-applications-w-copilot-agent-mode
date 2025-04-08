@@ -1,8 +1,7 @@
-"""
-URL configuration for octofit_tracker project.
+"""octofit_tracker URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
+    https://docs.djangoproject.com/en/4.1/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -18,16 +17,34 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import UserViewSet, TeamViewSet, ActivityViewSet, LeaderboardViewSet, WorkoutViewSet
+from .views import UserViewSet, TeamViewSet, ActivityViewSet, LeaderboardViewSet, WorkoutViewSet, api_root
+from .views import add_user
+from django.http import HttpResponse
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'teams', TeamViewSet)
-router.register(r'activity', ActivityViewSet)
+router.register(r'activities', ActivityViewSet)
 router.register(r'leaderboard', LeaderboardViewSet)
 router.register(r'workouts', WorkoutViewSet)
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path('', include(router.urls)),
+    path('admin/', admin.site.urls),
+    path('api/', include(router.urls)),
+]
+
+urlpatterns += [
+    path('', api_root, name='api-root'),
+]
+
+urlpatterns += [
+    path('api/add_user/', add_user, name='add_user'),
+]
+
+def catch_all(request):
+    print(f"Unhandled request: {request.method} {request.path}")
+    return HttpResponse("Endpoint not found", status=404)
+
+urlpatterns += [
+    path('<path:unmatched>/', catch_all),
 ]
